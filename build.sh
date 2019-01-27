@@ -212,9 +212,9 @@ download \
   "https://github.com/xiph/speex/archive/"
 
 download \
-  "n4.0.tar.gz" \
-  "ffmpeg4.0.tar.gz" \
-  "4749a5e56f31e7ccebd3f9924972220f" \
+  "n4.1.tar.gz" \
+  "ffmpeg4.1.tar.gz" \
+  "53dfa0319f60e0da8835906063311f56" \
   "https://github.com/FFmpeg/FFmpeg/archive"
 
 [ $download_only -eq 1 ] && exit 0
@@ -268,14 +268,14 @@ cd $BUILD_DIR/x264*
 PATH="$BIN_DIR:$PATH" make -j $jval
 make install
 
-echo "*** Building x265 ***"
-cd $BUILD_DIR/x265*
-cd build/linux
-[ $rebuild -eq 1 ] && find . -mindepth 1 ! -name 'make-Makefiles.bash' -and ! -name 'multilib.sh' -exec rm -r {} +
-PATH="$BIN_DIR:$PATH" cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="$TARGET_DIR" -DENABLE_SHARED:BOOL=OFF -DSTATIC_LINK_CRT:BOOL=ON -DENABLE_CLI:BOOL=OFF ../../source
-sed -i 's/-lgcc_s/-lgcc_eh/g' x265.pc
-make -j $jval
-make install
+#echo "*** Building x265 ***"
+#cd $BUILD_DIR/x265*
+#cd build/linux
+#[ $rebuild -eq 1 ] && find . -mindepth 1 ! -name 'make-Makefiles.bash' -and ! -name 'multilib.sh' -exec rm -r {} +
+#PATH="$BIN_DIR:$PATH" cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="$TARGET_DIR" -DENABLE_SHARED:BOOL=OFF -DSTATIC_LINK_CRT:BOOL=ON -DENABLE_CLI:BOOL=OFF ../../source
+#sed -i 's/-lgcc_s/-lgcc_eh/g' x265.pc
+#make -j $jval
+#make install
 
 echo "*** Building fdk-aac ***"
 cd $BUILD_DIR/fdk-aac*
@@ -330,10 +330,10 @@ cd $BUILD_DIR/libvpx*
 PATH="$BIN_DIR:$PATH" make -j $jval
 make install
 
-echo "*** Building librtmp ***"
-cd $BUILD_DIR/rtmpdump-*
-cd librtmp
-[ $rebuild -eq 1 ] && make distclean || true
+#echo "*** Building librtmp ***"
+#cd $BUILD_DIR/rtmpdump-*
+#cd librtmp
+#[ $rebuild -eq 1 ] && make distclean || true
 
 # there's no configure, we have to edit Makefile directly
 if [ "$platform" = "linux" ]; then
@@ -343,7 +343,7 @@ if [ "$platform" = "linux" ]; then
 elif [ "$platform" = "darwin" ]; then
   sed -i "" "s/prefix=.*/prefix=${TARGET_DIR_SED}/" ./Makefile
 fi
-make install_base
+#make install_base
 
 echo "*** Building libsoxr ***"
 cd $BUILD_DIR/soxr-*
@@ -461,42 +461,22 @@ elif [ "$platform" = "darwin" ]; then
   PKG_CONFIG_PATH="${TARGET_DIR}/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/share/pkgconfig:/usr/local/Cellar/openssl/1.0.2o_1/lib/pkgconfig" ./configure \
     --cc=/usr/bin/clang \
     --prefix="$TARGET_DIR" \
+    --pkg-config="pkg-config --static" \
     --pkg-config-flags="--static" \
     --extra-cflags="-I$TARGET_DIR/include" \
     --extra-ldflags="-L$TARGET_DIR/lib" \
     --extra-ldexeflags="-Bstatic" \
     --bindir="$BIN_DIR" \
-    --enable-pic \
-    --enable-ffplay \
-    --enable-fontconfig \
-    --enable-frei0r \
-    --enable-gpl \
     --enable-version3 \
-    --enable-libass \
-    --enable-libfribidi \
-    --enable-libfdk-aac \
-    --enable-libfreetype \
     --enable-libmp3lame \
-    --enable-libopencore-amrnb \
-    --enable-libopencore-amrwb \
-    --enable-libopenjpeg \
-    --enable-libopus \
-    --enable-librtmp \
-    --enable-libsoxr \
-    --enable-libspeex \
-    --enable-libvidstab \
-    --enable-libvorbis \
-    --enable-libvpx \
-    --enable-libwebp \
-    --enable-libx264 \
-    --enable-libx265 \
-    --enable-libxvid \
-    --enable-libzimg \
-    --enable-nonfree \
-    --enable-openssl
+    --enable-static \
+    --disable-shared \
+    --disable-debug \
+    --disable-outdev="sdl2"
 fi
 
 PATH="$BIN_DIR:$PATH" make -j $jval
 make install
 make distclean
 hash -r
+echo Done
